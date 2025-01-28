@@ -16,13 +16,13 @@ cachelib = "^0.13.0"
 pyjwt = "^2.8.0"
 six = "^1.16.0"
 cryptography = ">=3.4.0"
-zimports = "^0.6.1"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.1.1"
 python-dotenv = "^1.0.1"
 Flask-Cors = "^4.0.0"
 black = "^24.4.1"
+zimports = "^0.6.1"
 
 [build-system]
 requires = ["poetry-core"]

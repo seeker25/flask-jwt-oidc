@@ -197,13 +197,15 @@ class JwtManager:  # pylint: disable=too-many-instance-attributes
 
         return cookie
 
-    def contains_role(self, claims, roles):
+    def contains_role(self, roles, claims=None):
         """Check that the listed roles are in the token using the registered callback.
 
         Args:
             roles [str,]: Comma separated list of valid roles
             JWT_ROLE_CALLBACK (fn): The callback added to the Flask configuration
         """
+        if not claims:
+            claims = self._require_auth_validation()
         roles_in_token = current_app.config['JWT_ROLE_CALLBACK'](claims)
         if any(elem in roles_in_token for elem in roles):
             return True
@@ -220,7 +222,7 @@ class JwtManager:  # pylint: disable=too-many-instance-attributes
             @wraps(f)
             def wrapper(*args, **kwargs):
                 claims = self._require_auth_validation(*args, **kwargs)
-                if self.contains_role(claims, roles):
+                if self.contains_role(roles, claims):
                     return f(*args, **kwargs)
                 raise AuthError({'code': 'missing_a_valid_role',
                                  'description':
@@ -228,16 +230,15 @@ class JwtManager:  # pylint: disable=too-many-instance-attributes
             return wrapper
         return decorated
 
-    def validate_roles(self, claims, required_roles):
+    def validate_roles(self, required_roles, claims=None):
         """Check that the listed roles are in the token using the registered callback.
 
         Args:
             required_roles [str,]: Comma separated list of required roles
             JWT_ROLE_CALLBACK (fn): The callback added to the Flask configuration
         """
-        # token = self.get_token_auth_header()
-        # jwt.decode(token
-        # unverified_claims = jwt.get_unverified_claims(token)
+        if not claims:
+            claims = self._require_auth_validation()
         roles_in_token = current_app.config['JWT_ROLE_CALLBACK'](claims)
         if all(elem in roles_in_token for elem in required_roles):
             return True
@@ -254,7 +255,7 @@ class JwtManager:  # pylint: disable=too-many-instance-attributes
             @wraps(f)
             def wrapper(*args, **kwargs):
                 claims = self._require_auth_validation(*args, **kwargs)
-                if self.validate_roles(claims, required_roles):
+                if self.validate_roles(required_roles, claims):
                     return f(*args, **kwargs)
                 raise AuthError({'code': 'missing_required_roles',
                                  'description':
